@@ -7,8 +7,12 @@ def main(pcd_path):
     # Load a .pcd file
     pcd = o3d.io.read_point_cloud(pcd_path)
 
+    # Downsample the point cloud
+    voxel_size = 10.0  # Set this to a value that works well for your specific point cloud
+    pcd_downsampled = pcd.voxel_down_sample(voxel_size)
+
     # Convert Open3D.o3d.geometry.PointCloud to numpy array
-    points = np.asarray(pcd.points)
+    points = np.asarray(pcd_downsampled.points)
 
     # Create a scatter plot
     fig, ax = plt.subplots()

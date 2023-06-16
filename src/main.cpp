@@ -10,6 +10,21 @@
 #include <projection_converter/converter_from_llh.hpp>
 #include <projection_converter/converter_to_llh.hpp>
 
+// Function to draw a progress bar
+void drawProgressBar(int len, double percent) {
+  std::cout << "Progress: ";
+  for (int i = 0; i < len; ++i) {
+    if (i < static_cast<int>(len * percent)) {
+      std::cout << '=';
+    }
+    else {
+      std::cout << ' ';
+    }
+  }
+  std::cout << " [" << static_cast<int>(100 * percent) << "%]\r";
+  std::cout.flush();
+}
+
 
 int main(int argc, char** argv) {
   if (argc != 5) {
@@ -33,12 +48,17 @@ int main(int argc, char** argv) {
   ConverterFromLLH from_llh(output_config);
 
   // Convert points
-  for (auto& point : cloud->points) {
+  size_t n_points = cloud->points.size();
+  for (size_t i = 0; i < n_points; ++i) {
+    auto& point = cloud->points[i];
     pcl::PointXYZ llh = to_llh.convert(point);
-    // std::cout << std::setprecision(10) <<  llh.x << ", " << llh.y << ", " << llh.z << std::endl;
-    // break;
     point = from_llh.convert(llh);
+
+    // Update and draw the progress bar
+    drawProgressBar(70, static_cast<double>(i+1) / n_points);
   }
+  std::cout << std::endl;
+
   // Save converted point cloud to file
   pcl::io::savePCDFileASCII(argv[4], *cloud);
 
