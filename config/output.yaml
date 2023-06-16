@@ -1,0 +1,5 @@
+projector_type: "Stereographic"
+mgrs_origin:
+  latitude: xx
+  longitude: yy
+  altitude: zz
