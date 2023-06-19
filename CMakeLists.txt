@@ -12,16 +12,22 @@ find_package(GDAL REQUIRED)
 find_path(GeographicLib_INCLUDE_DIRS NAMES GeographicLib/Config.h)
 find_library(GeographicLib_LIBRARIES NAMES Geographic)
 
-include_directories(${PCL_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIR} ${GDAL_INCLUDE_DIR} ${GeographicLib_INCLUDE_DIRS} include)
+include_directories(${PCL_INCLUDE_DIRS})
+include_directories(${LANELET2_INCLUDE_DIRS})
+include_directories(include)
 
 link_directories(${PCL_LIBRARY_DIRS})
+link_directories(${LANELET2_LIBRARY_DIRS})
 
 add_definitions(${PCL_DEFINITIONS})
 
-# Add all cpp files in the src directory
-file(GLOB SOURCES "src/*.cpp")
+# Add the sub.cpp file as a library
+add_library(ConverterLib "src/converter_from_llh.cpp" "src/converter_to_llh.cpp")
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+# Create two executables
+add_executable(PCDConverter "src/pcd_conversion.cpp")
+add_executable(Lanelet2Converter "src/lanelet_conversion.cpp")
 
 # Link the libraries
-target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES} yaml-cpp ${GDAL_LIBRARY} ${GeographicLib_LIBRARIES})
+target_link_libraries(PCDConverter ConverterLib ${PCL_LIBRARIES} yaml-cpp ${GDAL_LIBRARY} ${GeographicLib_LIBRARIES})
+target_link_libraries(Lanelet2Converter ConverterLib ${PCL_LIBRARIES} yaml-cpp ${GDAL_LIBRARY} ${GeographicLib_LIBRARIES})

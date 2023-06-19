@@ -6,6 +6,7 @@
 #include <yaml-cpp/yaml.h>
 #include <gdal/ogr_spatialref.h>
 #include <GeographicLib/MGRS.hpp>
+#include <projection_converter/lat_lon_alt.hpp>
 
 #include <projection_converter/converter_from_llh.hpp>
 #include <projection_converter/converter_to_llh.hpp>
@@ -51,8 +52,11 @@ int main(int argc, char** argv) {
   size_t n_points = cloud->points.size();
   for (size_t i = 0; i < n_points; ++i) {
     auto& point = cloud->points[i];
-    pcl::PointXYZ llh = to_llh.convert(point);
+    double prev_x = point.x;
+    double prev_y = point.y;
+    LatLonAlt llh = to_llh.convert(point);
     point = from_llh.convert(llh);
+    // std::cout << std::setprecision(15) << prev_x << " and " << prev_y  << " to " << llh.lat << " to " << point.x << std::endl;
 
     // Update and draw the progress bar
     drawProgressBar(70, static_cast<double>(i+1) / n_points);

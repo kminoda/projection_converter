@@ -14,6 +14,14 @@ ConverterFromLLH::ConverterFromLLH(const YAML::Node & config)
     oTargetSRS.SetOS(config["mgrs_origin"]["latitude"].as<double>(), config["mgrs_origin"]["longitude"].as<double>(), 1, 0, 0);
 
     poTransform_ = OGRCreateCoordinateTransformation(&oSourceSRS, &oTargetSRS);
+  } else if (projector_type_ == "TransverseMercator") {
+    central_meridian_ = config["mgrs_origin"]["longitude"].as<double>();
+
+    // Calculate origin in Transverse Mercator coordinate
+    const GeographicLib::TransverseMercatorExact& proj = GeographicLib::TransverseMercatorExact::UTM();
+    double x, y;
+    proj.Forward(central_meridian_, config["mgrs_origin"]["latitude"].as<double>(), config["mgrs_origin"]["longitude"].as<double>(), x, y);
+    origin_xy_ = std::pair<double, double>(x, y);
   }
 }
 
@@ -23,12 +31,12 @@ ConverterFromLLH::~ConverterFromLLH()
   OCTDestroyCoordinateTransformation(poTransform_);
 }
 
-pcl::PointXYZ ConverterFromLLH::convert(const pcl::PointXYZ & llh)
+pcl::PointXYZ ConverterFromLLH::convert(const LatLonAlt & llh)
 {
   pcl::PointXYZ xyz;
   if (projector_type_ == "Stereographic") {
-    double x = llh.x; // longitude
-    double y = llh.y; // latitude
+    double x = llh.lon; // longitude
+    double y = llh.alt; // latitude
 
     if (!poTransform_->Transform(1, &x, &y)) {
       std::cerr << "Error: Transformation failed.\n";
@@ -37,10 +45,23 @@ pcl::PointXYZ ConverterFromLLH::convert(const pcl::PointXYZ & llh)
 
     xyz.x = x;
     xyz.y = y;
-    xyz.z = llh.z;
+    xyz.z = llh.alt;
+
+  } else if (projector_type_ == "TransverseMercator") {
+    const GeographicLib::TransverseMercatorExact& proj = GeographicLib::TransverseMercatorExact::UTM();
+
+    // Variables to hold the results
+    double x, y;
+
+    // Convert to transverse mercator coordinates
+    proj.Forward(central_meridian_, llh.lat, llh.lon, x, y);
+    xyz.x = x - origin_xy_.first;
+    xyz.y = y - origin_xy_.second;
+    xyz.z = llh.alt;
 
   } else {
-    std::cerr << "Error: Only conversion to Stereographic is supported currently.\n";
+    std::cerr << "Error: Only conversion to Stereographic or TransverseMercator is supported currently.\n";
+    std::cerr << "Not supported projector type: " << projector_type_ << std::endl;
     return pcl::PointXYZ();
   }
   return xyz;
