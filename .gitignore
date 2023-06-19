@@ -48,3 +48,7 @@ Makefile
 .vs/
 .vscode/
 *.sublime-*
+
+# For this project
+build/
+data/
