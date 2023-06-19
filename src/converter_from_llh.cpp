@@ -35,8 +35,8 @@ pcl::PointXYZ ConverterFromLLH::convert(const LatLonAlt & llh)
 {
   pcl::PointXYZ xyz;
   if (projector_type_ == "Stereographic") {
-    double x = llh.lon; // longitude
-    double y = llh.alt; // latitude
+    double x = llh.lat; // latitude
+    double y = llh.lon; // longitude
 
     if (!poTransform_->Transform(1, &x, &y)) {
       std::cerr << "Error: Transformation failed.\n";
