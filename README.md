@@ -13,7 +13,7 @@ mgrs_grid: "54SUE"
 ```yaml
 # output.yaml
 projector_type: "Stereographic"
-mgrs_origin:
+map_origin:
   latitude: xx
   longitude: yy
   altitude: zz
@@ -32,12 +32,12 @@ cd build
 cmake ..
 make
 ```
-This will create an executable named `ProjectionConverter` in the build directory.
+This will create an executable named `PCDConverter` and `Lanelet2Converter` in the build directory.
 
 ## Usage
 To run the program, navigate to the build directory and use the following command:
 
 ```bash
-./ProjectionConverter path_to_input_yaml path_to_output_yaml path_to_input_pcd_file path_to_output_pcd_file
+./PCDConverter path_to_input_yaml path_to_output_yaml path_to_input_pcd_file path_to_output_pcd_file
 ```
 Replace `path_to_input_yaml`, `path_to_output_yaml`, `path_to_pointcloud_file`, and `path_to_output_pcd_file` with the paths to your input YAML configuration file, output YAML configuration file, and PCD file, respectively.

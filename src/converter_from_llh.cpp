@@ -11,16 +11,16 @@ ConverterFromLLH::ConverterFromLLH(const YAML::Node & config)
     oSourceSRS.SetWellKnownGeogCS("WGS84");
     
     // Set the target SRS to a Stereographic projection
-    oTargetSRS.SetOS(config["mgrs_origin"]["latitude"].as<double>(), config["mgrs_origin"]["longitude"].as<double>(), 1, 0, 0);
+    oTargetSRS.SetOS(config["map_origin"]["latitude"].as<double>(), config["map_origin"]["longitude"].as<double>(), 1, 0, 0);
 
     poTransform_ = OGRCreateCoordinateTransformation(&oSourceSRS, &oTargetSRS);
   } else if (projector_type_ == "TransverseMercator") {
-    central_meridian_ = config["mgrs_origin"]["longitude"].as<double>();
+    central_meridian_ = config["map_origin"]["longitude"].as<double>();
 
     // Calculate origin in Transverse Mercator coordinate
     const GeographicLib::TransverseMercatorExact& proj = GeographicLib::TransverseMercatorExact::UTM();
     double x, y;
-    proj.Forward(central_meridian_, config["mgrs_origin"]["latitude"].as<double>(), config["mgrs_origin"]["longitude"].as<double>(), x, y);
+    proj.Forward(central_meridian_, config["map_origin"]["latitude"].as<double>(), config["map_origin"]["longitude"].as<double>(), x, y);
     origin_xy_ = std::pair<double, double>(x, y);
   }
 }
